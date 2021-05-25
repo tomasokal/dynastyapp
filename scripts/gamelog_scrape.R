@@ -44,37 +44,34 @@ library(tinytest)
 
     temp_url <- as.character(x)
     temp_table <- data.table::data.table(rvest::html_table(xml2::read_html(x))[[1]])
-    check <- c(paste0("V", ncol(temp_table)))
+    colnames(temp_table) <- paste0("var", seq(1:ncol(temp_table)))
     
-    temp_table <- temp_table[`V1` != 'Rk', ]
+    temp_table <- temp_table[var1 != 'Rk', ]
     temp_table <- temp_table[1:nrow(temp_table)-1, ]
-    temp_table <- temp_table[, .(year = `V2`
-                                 , week = `V5`
-                                 , g_count = .N
-                                 , rt_count = 11
-                                 # , rt_cum
-                                 # , ra_count
-                                 # , ra_cum
-                                 # , yrc_count
-                                 # , yrc_cum
-                                 # , yra_count
-                                 # , yra_cum
-                                 # , trc_count
-                                 # , trc_cum
-                                 # , tra_count
-                                 # , tra_cum
-                                 # , tt_count
-                                 # , tt_cum
+    temp_table <- temp_table[, .(year = var2
+                                 , week = var5
+                                 , g_count = .I
+                                 , ret_count = as.numeric(var11)
+                                 , rec_count = as.numeric(var12)
+                                 , rey_count = as.numeric(var13)
+                                 , retd_count = as.numeric(var14)
+                                 , rua_count = as.numeric(var27)
+                                 , ruy_count = as.numeric(var28)
+                                 , rutd_count = as.numeric(var29)
     )]
-                                 
-      
-      
-      year = Year
-                                 )]
+    temp_table[, ttd_count := sum(retd_count, rutd_count), by = 1:nrow(temp_table)]
+    temp_table[, g_cum := cumsum(g_count)]
+    temp_table[, ret_cum := cumsum(ret_count)]
+    temp_table[, rec_cum := cumsum(rec_count)]
+    temp_table[, rey_cum := cumsum(rey_count)]
+    temp_table[, retd_cum := cumsum(retd_count)]
+    temp_table[, rua_cum := cumsum(rua_count)]
+    temp_table[, ruy_cum := cumsum(ruy_count)]
+    temp_table[, rutd_cum := cumsum(rutd_count)]
+    temp_table[, ttd_cum := cumsum(ttd_count)]
 
     return(temp_table)
     
   }
   
-  test_list <- list(c(nodes_list[, 3]))
   woop_woop <- lapply(as.list(nodes_list$url)[1:10], scrape_gamelog_advanced)
